@@ -1,2 +1,4 @@
 //ignore all pdf files
 *pdf
+
+this content is fr testing git branch functionality.
