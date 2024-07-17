@@ -1,6 +1,3 @@
-
-Weather APP
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,31 +5,90 @@ Weather APP
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       background-color: #f1f1f1;
-      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    
+
     #weather-container {
       background-color: white;
-      padding: 20px;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 32px;
+      color: #333;
+    }
+
+    #city-input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
       border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 200px;
+      margin-right: 10px;
+    }
+
+    #search-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #search-button:hover {
+      background-color: #0056b3;
+    }
+
+    #weather-info {
+      margin-top: 20px;
+    }
+
+    #city-name {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #temperature-celsius, #temperature-fahrenheit {
+      font-size: 36px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    #description {
+      font-size: 18px;
+      color: #666;
     }
   </style>
 </head>
 <body>
-  <h1>Weather App</h1>
-
-  <div>
-    <input type="text" id="city-input" placeholder="Enter City Name" />
-    <button id="search-button">Check</button>
-  </div>
-
   <div id="weather-container">
-    <h2 id="city-name"></h2>
-    <p id="temperature"></p>
-    <p id="description"></p>
+    <h1>Weather App</h1>
+    <div>
+      <input type="text" id="city-input" placeholder="Enter City Name" />
+      <button id="search-button">Check</button>
+    </div>
+    <div id="weather-info">
+      <h2 id="city-name"></h2>
+      <div>
+        <span id="temperature-celsius"></span>
+        <span id="temperature-fahrenheit"></span>
+      </div>
+      <p id="description"></p>
+    </div>
   </div>
 
   <script>
@@ -43,21 +99,34 @@ Weather APP
 
     function fetchWeatherData(city) {
       fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
         .then(data => {
+          const tempInCelsius = data.main.temp;
+          const tempInFahrenheit = (tempInCelsius * (9/5)) + 32;
+
           document.getElementById('city-name').textContent = data.name;
-          document.getElementById('temperature').textContent = `${data.main.temp}°C`;
+          document.getElementById('temperature-celsius').textContent = `${tempInCelsius.toFixed(2)}°C`;
+          document.getElementById('temperature-fahrenheit').textContent = `${tempInFahrenheit.toFixed(2)}°F`;
           document.getElementById('description').textContent = data.weather[0].description;
         })
         .catch(error => {
           console.error('Error fetching weather data:', error);
-          document.getElementById('weather-container').textContent = 'Error fetching weather data.';
+          document.getElementById('weather-info').innerHTML = '<h2>Error</h2><p>Error fetching weather data. Please try again later.</p>';
         });
     }
 
     searchButton.addEventListener('click', () => {
       const city = cityInput.value;
-      fetchWeatherData(city);
+      if (city.trim() !== '') {
+        fetchWeatherData(city);
+      } else {
+        document.getElementById('weather-info').innerHTML = '<h2>Error</h2><p>Please enter a city name.</p>';
+      }
     });
   </script>
 </body>
